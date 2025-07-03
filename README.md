@@ -95,13 +95,6 @@ _若是第一次运行程序，上述步骤会执行两遍_
 
 [openschoolcn/zfn_api](https://github.com/openschoolcn/zfn_api "openschoolcn/zfn_api")
 
-## 最便宜的 VPN
-
-[https://nianbroken.github.io/Great-Firewall/](https://nianbroken.github.io/Great-Firewall/)
-
-## 性价比最高的 ChatGPT 镜像站
-[Aizex 合租面板](https://aizex.klaio.top/)
-
 ## 其他
 
 欢迎提交 `Issues` 和 `Pull requests`
