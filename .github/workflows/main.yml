@@ -57,14 +57,33 @@ jobs:
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
           rm -f google-chrome-stable_current_amd64.deb
 
-      - name: Install ChromeDriver
+      - name: Install ChromeDriver (auto-match version)
         run: |
-          CHROMEDRIVER_VERSION=$(curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
+          CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d '.' -f 1)
+          
+          echo "Installed Chrome version: $CHROME_VERSION"
+
+          DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" \
+            | grep -A 10 "\"$CHROME_MAJOR\"" \
+            | grep '"version":' \
+            | head -n 1 \
+            | sed -E 's/[^0-9.]//g')
+
+          if [ -z "$DRIVER_VERSION" ]; then
+            echo "❌ Failed to find matching ChromeDriver version for Chrome $CHROME_MAJOR"
+            exit 1
+          fi
+
+          echo "Found matching ChromeDriver version: $DRIVER_VERSION"
+
+          # 下载并安装
+          wget -O chromedriver.zip "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
           unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/chromedriver
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
-          rm -f chromedriver.zip
+          rm -rf chromedriver.zip chromedriver-linux64
+
 
       - name: Get Connection
         run: |
