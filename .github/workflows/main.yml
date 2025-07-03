@@ -39,16 +39,32 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-      # 配置Python环境
       - name: Set up Python
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v4
         with:
-          python-version: "*"
+          python-version: "3.10"
+          cache: "pip"  # ✅ 启用官方内置 pip 缓存
 
+
+      
+      # pip 缓存 + requirements.txt 安装方式
+      - name: Cache pip installed packages
+        id: cache-pip-installed
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/lib/python3.10/site-packages
+          key: ${{ runner.os }}-pip-installed-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-installed-
+
+      
       - name: Install dependencies
         run: |
-          # 使用pip安装项目的依赖项
-          pip install requests rsa pyquery selenium
+          if [ ! -d ~/.cache/pip ]; then
+            echo "No pip cache found, installing dependencies..."
+          fi
+          pip install -r requirements.txt
+
 
       # === 缓存 Chrome v126 ===
       - name: Cache Chrome
@@ -61,10 +77,13 @@ jobs:
       - name: Install Chrome 126
         if: steps.cache-chrome.outputs.cache-hit != 'true'
         run: |
-          wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chrome-linux64.zip
+          wget --no-verbose https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chrome-linux64.zip
           unzip chrome-linux64.zip
           sudo mv chrome-linux64 /opt/chrome
           rm -f chrome-linux64.zip
+
+
+      - run: echo "Cache hit (Chrome): ${{ steps.cache-chrome.outputs['cache-hit'] }}"
 
       # 替换系统默认 Chrome（避免系统自带的 Chrome 版本不符合要求）
       - name: Replace system Chrome with Chrome 126
@@ -83,11 +102,14 @@ jobs:
       - name: Install ChromeDriver 126
         if: steps.cache-chromedriver.outputs.cache-hit != 'true'
         run: |
-          wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chromedriver-linux64.zip
+          wget --no-verbose https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
           rm -rf chromedriver-linux64.zip chromedriver-linux64
+      
+      - run: echo "Cache hit (ChromeDriver): ${{ steps.cache-chromedriver.outputs['cache-hit'] }}"
+
 
       - name: Get Connection
         run: |
@@ -231,7 +253,12 @@ jobs:
 
       - name: Force push changes to the running branch
         run: |
-          # 将更改强制推送到运行分支
-          git add .
-          git commit -m "Update from GitHub Actions" || true
-          git push origin $GITHUB_REF_NAME --force
+          # 强制推送更改到当前运行的分支
+          # 检查是否有更改需要提交
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add .
+            git commit -m "Update from GitHub Actions"
+            git push origin $GITHUB_REF_NAME --force
+          fi
