@@ -55,6 +55,12 @@ jobs:
           wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chrome-linux64.zip
           unzip chrome-linux64.zip
           sudo mv chrome-linux64 /opt/chrome
+
+          # 如果已存在 /usr/bin/google-chrome，则先删除
+          if [ -e /usr/bin/google-chrome ]; then
+            sudo rm /usr/bin/google-chrome
+          fi
+
           sudo ln -s /opt/chrome/chrome /usr/bin/google-chrome
           rm -f chrome-linux64.zip
 
