@@ -55,17 +55,16 @@ jobs:
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt update
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          rm -f google-chrome-stable_current_amd64.deb  # ✅ 删除安装包
+          rm -f google-chrome-stable_current_amd64.deb
 
       - name: Install ChromeDriver
         run: |
-          DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" \
-            | grep -oP '"version": "\K[0-9.]+' | head -n 1)
-          wget -O chromedriver.zip "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+          CHROMEDRIVER_VERSION=$(curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo mv chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
-          rm -rf chromedriver.zip chromedriver-linux64  # ✅ 删除解压文件夹和 zip
+          rm -f chromedriver.zip
 
       - name: Get Connection
         run: |
