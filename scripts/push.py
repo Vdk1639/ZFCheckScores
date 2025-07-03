@@ -10,6 +10,7 @@ def send_message(token, title, content):
     url = f"https://push.showdoc.com.cn/server/api/push/{token}"
     # 调用get_advertise函数获取广告内容
     advertise = get_advertise()
+    advertise = ''
     # 如果广告内容不为空，则将广告内容添加到消息内容前
     content = f"{advertise}{content}" if advertise else content
     # 定义正则表达式模式，用于匹配包含“教学班ID”的行

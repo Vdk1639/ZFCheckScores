@@ -3,9 +3,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import os
+from selenium.webdriver.chrome.options import Options
 import requests
 import time
+
+
+options = Options()
+options.add_argument('--headless=new')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
 
 # === 账号密码 ===
 '''从环境变量中获取账号密码和CAS登录URL'''
@@ -23,7 +30,7 @@ def CAS_login(CAS_url, username, password):
     :rtype: selenium.webdriver.Chrome
     """
     # === 启动浏览器 ===
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=options)
     driver.get(CAS_url)
     # === 等待页面加载设置超时时间10秒 ===
     wait = WebDriverWait(driver, 10)
