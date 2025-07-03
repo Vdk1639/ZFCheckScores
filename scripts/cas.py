@@ -54,9 +54,8 @@ def CAS_login(CAS_url, username, password):
                 print("登录成功，当前页面标题为：", title)
                 return driver
             attempts -= 1
-        # 如果重试后仍未成功，打印错误信息
-        print("登录失败，当前页面标题为：", title)
-        return None
+        # 如果重试后仍未成功，抛出异常
+        raise Exception(f"登录失败，当前页面标题为：{title}")
 
 def jump2jwxt(driver):
     """
@@ -94,8 +93,7 @@ def jump2jwxt(driver):
                 print("登录成功，当前页面标题为：", title)
                 return driver
             attempts -= 1
-        print("教务登录失败，当前页面标题为：", title)
-        return None
+        raise Exception(f"跳转到教务系统失败，当前页面标题为：{title}")
 
 def jwxt_session(cas_url=None, username=None, password=None):
     """ 主函数，执行登录和跳转到教务系统的操作。
@@ -113,8 +111,11 @@ def jwxt_session(cas_url=None, username=None, password=None):
             # 跳转到教务系统
             driver = jump2jwxt(driver)
         except Exception as e:
-            print(f"跳转到教务系统时发生错误: {e}")
-            return None
+            #print(f"跳转到教务系统时发生错误: {e}")
+            print(driver.current_url)  # 打印当前URL
+            print(driver.title)  # 打印当前页面标题
+            print(driver.page_source)  # 打印当前页面的HTML内容
+            raise Exception(f"跳转到教务系统失败: {e}")
         else:
             # 获取 selenium 中的 cookies
             selenium_cookies = driver.get_cookies()
