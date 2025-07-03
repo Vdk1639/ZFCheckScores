@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: |
           # 使用pip安装项目的依赖项
-          pip install requests rsa pyquery
+          pip install requests rsa pyquery selenium
 
       - name: Get Connection
         run: |
