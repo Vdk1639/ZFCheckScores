@@ -7,7 +7,7 @@ run-name: ${{ github.workflow }} ${{ github.sha }}
 # 指定此工作流的触发器
 on:
   schedule:
-    - cron: "*/10 * * * *" # 每10分钟自动执行一次
+    - cron: "*/5 * * * *" # 每5分钟自动执行一次
   workflow_dispatch: # 可以手动执行
     inputs:
       force_push_message:
@@ -50,28 +50,37 @@ jobs:
           # 使用pip安装项目的依赖项
           pip install requests rsa pyquery selenium
 
+      # Chrome 缓存
+      - name: Cache Chrome
+        uses: actions/cache@v4
+        with:
+          path: /opt/chrome
+          key: ${{ runner.os }}-chrome-126
+
       - name: Install Chrome 126
+        if: steps.cache-chrome.outputs.cache-hit != 'true'
         run: |
           wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chrome-linux64.zip
           unzip chrome-linux64.zip
           sudo mv chrome-linux64 /opt/chrome
-
-          # 如果已存在 /usr/bin/google-chrome，则先删除
-          if [ -e /usr/bin/google-chrome ]; then
-            sudo rm /usr/bin/google-chrome
-          fi
-
-          sudo ln -s /opt/chrome/chrome /usr/bin/google-chrome
+          sudo ln -sf /opt/chrome/chrome /usr/bin/google-chrome
           rm -f chrome-linux64.zip
 
+      # ChromeDriver 缓存
+      - name: Cache ChromeDriver
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/chromedriver
+          key: ${{ runner.os }}-chromedriver-126
+
       - name: Install ChromeDriver 126
+        if: steps.cache-chromedriver.outputs.cache-hit != 'true'
         run: |
           wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
           rm -rf chromedriver-linux64.zip chromedriver-linux64
-
 
       - name: Get Connection
         run: |
