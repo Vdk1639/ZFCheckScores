@@ -8,6 +8,7 @@ from scripts.get_user_info import get_user_info
 from scripts.get_grade import get_grade
 from scripts.get_selected_courses import get_selected_courses
 from scripts.push import send_message
+from scripts.cas import jwxt_session
 from datetime import datetime
 
 
@@ -63,7 +64,11 @@ current_time = "------\n" + datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")[:-3]
 current_file_name = os.path.realpath(__file__)
 
 # 登录
-student_client = login(url, username, password)
+#student_client = login(url, username, password)
+# 修改原版逻辑，增加对CAS登录的支持
+jw_status_code, jw_response, base_url, jw_ses = jwxt_session(url, username, password)
+if jw_status_code == 200:
+    student_client = login(base_url, session=jw_ses)
 
 # 获取个人信息
 info = get_user_info(student_client, output_type="info")

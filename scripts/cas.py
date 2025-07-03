@@ -89,8 +89,8 @@ def jump2jwxt(driver):
             attempts -= 1
         print("教务登录失败，当前页面标题为：", title)
         return None
-    
-def main(cas_url=None, username=None, password=None):
+
+def jwxt_session(cas_url=None, username=None, password=None):
     """ 主函数，执行登录和跳转到教务系统的操作。
     :param cas_url: CAS登录URL
     :param username: 用户名
@@ -129,8 +129,12 @@ def main(cas_url=None, username=None, password=None):
                 session.cookies.set(cookie['name'], cookie['value'])
             # 访问教务系统页面
             print(f"正在访问教务页面: {jwxt_url}")
-            response = session.get(jwxt_url)
-            return response.status_code, response, session
+            # 处理教务url适配zfn_api
+            # 去除/jwglxt/后面的部分并保留/jwglxt/
+            base_url = jwxt_url.split("/jwglxt/")[0] + "/jwglxt/"
+            response = session.get(base_url)
+            print("教务系统base URL:", base_url)
+            return response.status_code, response, base_url, session
 
 if __name__ == "__main__":
     '''本地测试没有设置环境变量，直接在读取填写账号密码和CAS登录URL'''
@@ -139,4 +143,13 @@ if __name__ == "__main__":
         lines = f.readlines()
         USERNAME = lines[0].strip()  # 第一行是用户名
         PASSWORD = lines[1].strip()  # 第二行是密码
-    status_code, response, session=main(CAS_url, USERNAME, PASSWORD)
+    status_code, response, base_url, session = jwxt_session(CAS_url, USERNAME, PASSWORD)
+    if status_code == 200:
+        print("教务系统页面访问成功！")
+        print("教务系统页面内容长度:", len(response.text))
+    else:
+        print("教务系统页面访问失败！")
+        print("状态码:", status_code)
+        print("响应内容:", response.text[:200])  # 打印前200个字符
+    input("按回车键退出...")
+    
