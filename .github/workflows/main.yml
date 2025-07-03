@@ -50,8 +50,9 @@ jobs:
           # 使用pip安装项目的依赖项
           pip install requests rsa pyquery selenium
 
-      # Chrome 缓存
+      # === 缓存 Chrome ===
       - name: Cache Chrome
+        id: cache-chrome
         uses: actions/cache@v4
         with:
           path: /opt/chrome
@@ -63,11 +64,13 @@ jobs:
           wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.114/linux64/chrome-linux64.zip
           unzip chrome-linux64.zip
           sudo mv chrome-linux64 /opt/chrome
-          sudo ln -sf /opt/chrome/chrome /usr/bin/google-chrome
+          sudo rm -f /usr/bin/google-chrome || true
+          sudo ln -s /opt/chrome/chrome /usr/bin/google-chrome
           rm -f chrome-linux64.zip
 
-      # ChromeDriver 缓存
+      # === 缓存 ChromeDriver ===
       - name: Cache ChromeDriver
+        id: cache-chromedriver
         uses: actions/cache@v4
         with:
           path: /usr/local/bin/chromedriver
