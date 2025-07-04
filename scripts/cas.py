@@ -100,6 +100,8 @@ def jwxt_session(cas_url=None, username=None, password=None):
     :param cas_url: CAS登录URL
     :param username: 用户名
     :param password: 密码
+    :return: 教务系统页面的响应状态码、响应对象、教务系统的基础URL和requests会话对象
+    :rtype: tuple(int, requests.Response, str, requests.Session)
     """
     try:
         driver=CAS_login(cas_url, username, password)

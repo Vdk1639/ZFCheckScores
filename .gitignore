@@ -1,3 +1,5 @@
 __pycache__/
 config.txt
 tempCodeRunnerFile.py
+*.ipynb
+data/cas_session.pkl
