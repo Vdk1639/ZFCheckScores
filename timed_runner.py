@@ -3,7 +3,8 @@ import time
 INTERVAL = 300  # 5分钟
 
 def run_local():
-    import localrun  # 确保 localrun.py 的主逻辑在 import 时能自动执行，或有 main() 可调用
+    import localrun
+    localrun.main()
 
 if __name__ == "__main__":
     while True:
