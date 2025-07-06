@@ -3,7 +3,6 @@ import re
 import hashlib
 import os
 import shutil
-import pickle
 from scripts.user_login import login
 from scripts.get_user_info import get_user_info
 from scripts.get_grade import get_grade
@@ -26,18 +25,6 @@ info_file_path = os.path.join(folder_path, "info.txt")
 grade_file_path = os.path.join(folder_path, "grade.txt")
 old_grade_file_path = os.path.join(folder_path, "old_grade.txt")
 
-# CAS会话持久化文件
-cas_session_file = os.path.join(folder_path, "cas_session.pkl")
-
-def is_jw_session_valid(base_url, session):
-    """检测教务系统session是否有效"""
-    try:
-        resp = session.get(base_url, timeout=10)
-        # 这里可根据实际页面内容进一步判断是否真的登录
-        return resp.status_code == 200 and "登录" not in resp.text
-    except Exception:
-        return False
-
 # 初始化运行次数
 run_count = 2
 
@@ -56,29 +43,9 @@ current_file_name = os.path.realpath(__file__)
 # 登录
 #student_client = login(url, username, password)
 # 修改原版逻辑，增加对CAS登录的支持
-# 加入CAS持久化保存机制
-if os.path.exists(cas_session_file):
-    try:
-        with open(cas_session_file, "rb") as f:
-            base_url, jw_ses = pickle.load(f)
-        # 检查session是否有效
-        if is_jw_session_valid(base_url, jw_ses):
-            student_client = login(base_url, session=jw_ses)
-            print("使用本地缓存的会话，无需重新登录。")
-        else:
-            print("本地会话已失效，重新登录CAS。")
-            base_url, jw_ses = None, None
-    except Exception as e:
-        print(f"加载本地会话失败: {e}")
-        base_url, jw_ses = None, None
-if not student_client:
-    jw_status_code, jw_response, base_url, jw_ses = jwxt_session(url, username, password)
-    if jw_status_code == 200:
-        student_client = login(base_url, session=jw_ses)
-        # 保存会话到本地
-        with open(cas_session_file, "wb") as f:
-            pickle.dump((base_url, jw_ses), f)
-
+jw_status_code, jw_response, base_url, jw_ses = jwxt_session(url, username, password)
+if jw_status_code == 200:
+    student_client = login(base_url, session=jw_ses)
 
 # 获取个人信息
 info = get_user_info(student_client, output_type="info")

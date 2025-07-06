@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from scripts.config import *
+from .config import *
 import requests
 import time
 
@@ -55,8 +55,8 @@ def CAS_login(CAS_url, username, password):
 
 def jump2jwxt(driver):
     """
-    在CAS登录后的WebDriver实例中，跳转到教务系统模块。
-    :param driver: CAS登录后的WebDriver实例
+    在登录后的WebDriver实例中，跳转到教务系统模块。
+    :param driver: 登录后的WebDriver实例
     """
     # 等待 iframe 加载完成
     wait = WebDriverWait(driver, 10)
@@ -89,14 +89,14 @@ def jump2jwxt(driver):
                 print("登录成功，当前页面标题为：", title)
                 return driver
             attempts -= 1
-        raise Exception(f"跳转到教务系统超时，当前页面标题为：{title}")
+        raise Exception(f"跳转到教务系统失败，当前页面标题为：{title}")
 
 def jwxt_session(cas_url=None, username=None, password=None):
     """ 主函数，执行登录和跳转到教务系统的操作。
     :param cas_url: CAS登录URL
     :param username: 用户名
     :param password: 密码
-    :return: 教务系统页面的响应状态码、响应对象、教务系统的baseURL和requests会话对象
+    :return: 教务系统页面的响应状态码、响应对象、教务系统的基础URL和requests会话对象
     :rtype: tuple(int, requests.Response, str, requests.Session)
     """
     try:
@@ -142,6 +142,37 @@ def jwxt_session(cas_url=None, username=None, password=None):
             print("教务系统base URL:", base_url)
             return response.status_code, response, base_url, session
 
+def get_jwxt_session(cas_url=None, username=None, password=None):
+    """
+    获取教务系统的requests会话。
+    :param cas_url: CAS登录URL
+    :param username: 用户名
+    :param password: 密码
+    :return: requests.Session对象
+    """
+    driver = CAS_login(cas_url, username, password)
+    # 获取 selenium 中的 cookies
+    selenium_cookies = driver.get_cookies()
+    # 获取当前标签页的URL（即教务系统的URL）
+    base_url = driver.current_url.split("xshome/")[0]
+    print(f"获取到的信息门户baseURL: {base_url}")
+    # 创建一个 requests 会话
+    session = requests.Session()
+    # 设置与浏览器相同的请求头，增加请求的伪装性
+    session.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Connection': 'keep-alive',
+    })
+    # 将 selenium 的 cookies 复制到 requests 会话中
+    for cookie in selenium_cookies:
+        session.cookies.set(cookie['name'], cookie['value'])
+    # 直接用url访问教务系统页面
+    jwxt_url = base_url + "jwglxt/"
+    response = session.get(jwxt_url)
+    print("教务系统base URL:", jwxt_url)
+    return response.status_code, response, jwxt_url, session
 
 if __name__ == "__main__":
     '''本地测试没有设置环境变量，直接在读取填写账号密码和CAS登录URL'''
