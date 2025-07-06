@@ -57,6 +57,9 @@ current_file_name = os.path.realpath(__file__)
 #student_client = login(url, username, password)
 # 修改原版逻辑，增加对CAS登录的支持
 # 加入CAS持久化保存机制
+student_client = None
+base_url = None
+jw_ses = None
 if os.path.exists(cas_session_file):
     try:
         with open(cas_session_file, "rb") as f:
