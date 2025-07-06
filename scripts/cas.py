@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from .config import *
 import requests
 import time
 
@@ -14,11 +15,6 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
 
-# === 账号密码 ===
-'''从环境变量中获取账号密码和CAS登录URL'''
-'''CAS_url = os.environ.get("URL")
-USERNAME = os.environ.get("USERNAME")
-PASSWORD = os.environ.get("PASSWORD")'''
 
 def CAS_login(CAS_url, username, password):
     """
@@ -180,11 +176,12 @@ def get_jwxt_session(cas_url=None, username=None, password=None):
 
 if __name__ == "__main__":
     '''本地测试没有设置环境变量，直接在读取填写账号密码和CAS登录URL'''
-    CAS_url = "https://webvpn.njrts.edu.cn/"
-    with open("config.txt", "r") as f:
-        lines = f.readlines()
-        USERNAME = lines[0].strip()  # 第一行是用户名
-        PASSWORD = lines[1].strip()  # 第二行是密码
+    CAS_url = read_local_config()["url"]  # 从配置文件中读取CAS登录URL
+    USERNAME = read_local_config()["username"]  # 从配置文件中读取用户名
+    PASSWORD = read_local_config()["password"]  # 从配置文件中读取密码
+    print(f"CAS登录URL: {CAS_url}")
+    print(f"用户名: {USERNAME}")
+    print(f"密码: {PASSWORD}")
     status_code, response, base_url, session = jwxt_session(CAS_url, USERNAME, PASSWORD)
     if status_code == 200:
         print("教务系统页面访问成功！")
@@ -194,4 +191,3 @@ if __name__ == "__main__":
         print("状态码:", status_code)
         print("响应内容:", response.text[:200])  # 打印前200个字符
     input("按回车键退出...")
-    

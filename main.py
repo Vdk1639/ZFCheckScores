@@ -9,6 +9,7 @@ from scripts.get_grade import get_grade
 from scripts.get_selected_courses import get_selected_courses
 from scripts.push import send_message
 from scripts.cas import jwxt_session
+from scripts.config import * # 读取配置文件中的所有配置项
 from datetime import datetime
 
 
@@ -17,30 +18,6 @@ def md5_encrypt(string):
     return hashlib.md5(string.encode()).hexdigest()
 
 
-# 从环境变量中提取教务系统的URL、用户名、密码和TOKEN等信息
-force_push_message = os.environ.get("FORCE_PUSH_MESSAGE")
-github_actions = os.environ.get("GITHUB_ACTIONS")
-url = os.environ.get("URL")
-username = os.environ.get("USERNAME")
-password = os.environ.get("PASSWORD")
-token = os.environ.get("TOKEN")
-github_ref_name = os.environ.get("GITHUB_REF_NAME")
-github_event_name = os.environ.get("GITHUB_EVENT_NAME")
-github_actor = os.environ.get("GITHUB_ACTOR")
-github_actor_id = os.environ.get("GITHUB_ACTOR_ID")
-github_triggering_actor = os.environ.get("GITHUB_TRIGGERING_ACTOR")
-repository_name = os.environ.get("REPOSITORY_NAME")
-github_sha = os.environ.get("GITHUB_SHA")
-github_workflow = os.environ.get("GITHUB_WORKFLOW")
-github_run_number = os.environ.get("GITHUB_RUN_NUMBER")
-github_run_id = os.environ.get("GITHUB_RUN_ID")
-beijing_time = os.environ.get("BEIJING_TIME")
-github_step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-
-# 将字符串转换为布尔值
-# 是否强制推送信息
-# 若是非GitHub Actions环境,则默认强制推送信息
-force_push_message = force_push_message == "True" if github_actions else True
 
 # 定义文件路径
 folder_path = "data"
